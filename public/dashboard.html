@@ -319,8 +319,9 @@
                     <input type="number" id="productPrice" step="0.01" required>
                 </div>
                 <div class="form-group">
-                    <label>Imagen:</label>
-                    <input type="file" id="productImage" accept="image/*">
+                    <label>URL de Imagen (opcional):</label>
+                    <input type="url" id="productImage" placeholder="https://ejemplo.com/imagen.jpg">
+                    <small style="color: #666; font-size: 0.9em;">Puedes usar enlaces de imágenes de internet</small>
                 </div>
                 <div class="button-group">
                     <button type="submit" class="btn-success" style="flex: 1;">Guardar</button>
@@ -480,6 +481,7 @@
             if (product) {
                 document.getElementById('productName').value = product.name;
                 document.getElementById('productPrice').value = product.price;
+                document.getElementById('productImage').value = product.imagePath || '';
                 document.getElementById('productModal').classList.add('active');
             }
         }
@@ -490,6 +492,7 @@
             const name = document.getElementById('productName').value.trim();
             const priceValue = document.getElementById('productPrice').value;
             const price = parseFloat(priceValue) || 0;
+            const imageUrl = document.getElementById('productImage').value.trim();
 
             if (!name) {
                 alert('Por favor ingresa un nombre para el producto');
@@ -503,7 +506,8 @@
 
             const productData = {
                 name: name,
-                price: price
+                price: price,
+                imagePath: imageUrl || ''
             };
 
             try {

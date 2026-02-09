@@ -62,7 +62,7 @@ app.post('/api/products', (req, res) => {
 });
 
 app.put('/api/products/:id', (req, res) => {
-  const { name, price } = req.body;
+  const { name, price, imagePath } = req.body;
   const product = products.find(p => p.id === req.params.id);
 
   if (!product) {
@@ -71,6 +71,9 @@ app.put('/api/products/:id', (req, res) => {
 
   product.name = name;
   product.price = parseFloat(price);
+  if (imagePath !== undefined) {
+    product.imagePath = imagePath;
+  }
 
   res.json({ success: true, product });
 });
