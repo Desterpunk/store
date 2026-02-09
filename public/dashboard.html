@@ -370,15 +370,17 @@
                 products.forEach(product => {
                     const productEl = document.createElement('div');
                     productEl.className = 'product-item';
+                    const price = product.price || 0;
+                    const productName = product.name || 'Sin nombre';
                     productEl.innerHTML = `
                         <div class="product-image">
-                            ${product.imagePath ? `<img src="${product.imagePath}" alt="${product.name}">` : '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #ddd;">📷</div>'}
+                            ${product.imagePath ? `<img src="${product.imagePath}" alt="${productName}">` : '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #ddd;">📷</div>'}
                         </div>
                         <div class="product-info">
-                            <h3>${product.name}</h3>
-                            <div class="product-price">$${product.price.toFixed(2)}</div>
+                            <h3>${productName}</h3>
+                            <div class="product-price">$${price.toFixed(2)}</div>
                             <div class="button-group">
-                                <button class="btn-success" onclick="addToCart('${product.id}', '${product.name}', ${product.price})">Agregar al Carrito</button>
+                                <button class="btn-success" onclick="addToCart('${product.id}', '${productName}', ${price})">Agregar al Carrito</button>
                                 ${currentUser.isAdmin ? `
                                     <button class="btn-warning" onclick="editProduct('${product.id}')">Editar</button>
                                     <button class="btn-danger" onclick="deleteProduct('${product.id}')">Eliminar</button>
@@ -422,17 +424,21 @@
             document.getElementById('emptyCart').style.display = 'none';
             totalDiv.style.display = 'block';
 
-            cartList.innerHTML = cart.map(item => `
-                <div class="cart-item">
-                    <div class="cart-item-info">
-                        <h4>${item.name}</h4>
-                        <div class="cart-item-price">$${item.price.toFixed(2)} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}</div>
+            cartList.innerHTML = cart.map(item => {
+                const price = item.price || 0;
+                const quantity = item.quantity || 1;
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <div class="cart-item-price">$${price.toFixed(2)} x ${quantity} = $${(price * quantity).toFixed(2)}</div>
+                        </div>
+                        <button class="btn-danger" onclick="removeFromCart('${item.id}')">Quitar</button>
                     </div>
-                    <button class="btn-danger" onclick="removeFromCart('${item.id}')">Quitar</button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
             document.getElementById('totalAmount').textContent = total.toFixed(2);
         }
 
@@ -481,14 +487,24 @@
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const formData = new FormData();
-            formData.append('name', document.getElementById('productName').value);
-            formData.append('price', document.getElementById('productPrice').value);
+            const name = document.getElementById('productName').value.trim();
+            const priceValue = document.getElementById('productPrice').value;
+            const price = parseFloat(priceValue) || 0;
 
-            const imageFile = document.getElementById('productImage').files[0];
-            if (imageFile) {
-                formData.append('image', imageFile);
+            if (!name) {
+                alert('Por favor ingresa un nombre para el producto');
+                return;
             }
+
+            if (price < 0) {
+                alert('El precio debe ser mayor o igual a 0');
+                return;
+            }
+
+            const productData = {
+                name: name,
+                price: price
+            };
 
             try {
                 const url = editingProductId ? `${API_URL}/products/${editingProductId}` : `${API_URL}/products`;
@@ -496,14 +512,21 @@
 
                 const response = await fetch(url, {
                     method: method,
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
                 });
 
                 if (response.ok) {
                     closeModal();
                     loadProducts();
+                    alert('Producto guardado exitosamente');
+                } else {
+                    alert('Error al guardar el producto');
                 }
             } catch (error) {
+                console.error('Error:', error);
                 alert('Error al guardar producto');
             }
         });
