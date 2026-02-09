@@ -1,0 +1,29 @@
+{
+  "name": "store-manager",
+  "version": "1.0.0",
+  "description": "Sistema de gestión de tienda en línea",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo 'Building for Netlify'",
+    "serve": "netlify-cli serve"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0",
+    "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "netlify-cli": "^15.0.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
+
+
