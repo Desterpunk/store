@@ -352,6 +352,39 @@
             font-size: clamp(1em, 2.5vw, 1.2em);
         }
 
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out, slideDown 0.3s ease-out 2.7s forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+        }
+
         /* Tablet y Desktop */
         @media (max-width: 768px) {
             .cart-panel {
@@ -515,11 +548,21 @@
             }
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCart();
-            document.getElementById('cartPanel').classList.add('open');
-            // Solo mostrar overlay en desktop
-            if (window.innerWidth > 768) {
-                document.getElementById('cartOverlay').classList.add('show');
-            }
+
+            // Mostrar notificación de confirmación
+            showToast(`✓ ${name} agregado al carrito`);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            // Remover después de la animación
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
         }
 
         function removeFromCart(id) {
