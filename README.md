@@ -1,79 +1,97 @@
-# Store - Sistema de Tienda
+# 🛒 Store Manager - Tienda Online
 
-## Descripción
-Sistema de tienda con interfaz gráfica en Java Swing que permite:
+Sistema de gestión de tienda en línea con interfaz web moderna, desplegado en Netlify.
 
-### Funcionalidades Admin
-- Agregar productos
-- Editar productos (nombre, precio, imagen)
-- Eliminar productos
-- Gestión completa del inventario
+## 🚀 Características
 
-### Funcionalidades Cliente
-- Ver catálogo de productos
-- Agregar productos al carrito
-- Quitar productos del carrito
-- Realizar compra y enviar orden por WhatsApp
+- ✅ Panel de administrador (CRUD de productos)
+- ✅ Panel de cliente (carrito de compras)
+- ✅ Autenticación de usuarios
+- ✅ Integración con WhatsApp (3213391720)
+- ✅ Interfaz responsive (móvil + desktop)
+- ✅ 100% gratuito en Netlify
 
-## Credenciales de Acceso
+## 🔐 Acceso
 
-### Administrador
+**Administrador:**
 - Usuario: `admin`
 - Contraseña: `admin123`
 
-### Cliente de Prueba
+**Cliente de prueba:**
 - Usuario: `user`
 - Contraseña: `user123`
 
-También puedes registrar nuevos usuarios desde la pantalla de login.
+## 📋 Requisitos
 
-## Cómo Ejecutar
+- Node.js 18+
+- npm
+- Git
 
-1. Asegúrate de tener JDK 11 o superior instalado
-2. Ejecuta el proyecto con Gradle:
-   ```
-   .\gradlew run
-   ```
-   O desde IntelliJ IDEA: Click derecho en Main.java -> Run 'Main'
+## 🛠️ Instalación Local
 
-## Características Técnicas
+```bash
+# Instalar dependencias
+npm install
 
-- **Persistencia**: Los productos se guardan en un archivo JSON (`products.json`)
-- **Imágenes**: Las imágenes de productos se copian a la carpeta `images/`
-- **WhatsApp**: Al finalizar la compra, se abre WhatsApp Web con el resumen de la orden al número 3213391720
-
-## Estructura del Proyecto
-
-```
-src/main/java/org/example/
-├── Main.java                 # Punto de entrada
-├── model/
-│   ├── Product.java         # Modelo de producto
-│   ├── User.java            # Modelo de usuario
-│   └── CartItem.java        # Modelo de item del carrito
-├── service/
-│   ├── ProductService.java  # Servicio de gestión de productos
-│   ├── UserService.java     # Servicio de autenticación
-│   └── CartService.java     # Servicio del carrito de compras
-└── ui/
-    ├── LoginFrame.java      # Pantalla de login
-    ├── AdminFrame.java      # Pantalla de administración
-    └── CustomerFrame.java   # Pantalla de cliente/compras
+# Ejecutar servidor local
+npm start
 ```
 
-## Uso
+La aplicación estará disponible en `http://localhost:5000`
 
-1. **Login**: Inicia sesión como admin o usuario regular
-2. **Admin**: 
-   - Agrega productos con nombre, precio e imagen
-   - Edita o elimina productos existentes
-3. **Cliente**: 
-   - Navega por el catálogo
-   - Agrega productos al carrito
-   - Finaliza la compra (se abrirá WhatsApp con el resumen)
+## 🌐 Desplegar en Netlify
 
-## Tecnologías
-- Java 11+
-- Swing (GUI)
-- Gson (Serialización JSON)
-- Gradle (Build tool)
+1. Crea una cuenta en [GitHub](https://github.com)
+2. Crea un repositorio llamado `store-manager`
+3. Sube tu código:
+   ```bash
+   git init
+   git add .
+   git commit -m "Store Manager"
+   git remote add origin https://github.com/TU-USUARIO/store-manager.git
+   git push -u origin main
+   ```
+4. Ve a [Netlify](https://app.netlify.com)
+5. Sign up with GitHub
+6. New site from Git → selecciona `store-manager`
+7. ¡Deploy!
+
+Tu app estará en: `https://store-manager-xxxxx.netlify.app`
+
+## 📁 Estructura
+
+```
+Store/
+├── server.js                    # Backend (desarrollo local)
+├── netlify/functions/server.js  # Backend serverless
+├── public/
+│   ├── index.html              # Login
+│   └── dashboard.html          # Panel principal
+├── package.json                # Dependencias
+└── netlify.toml                # Configuración Netlify
+```
+
+## 🔄 Actualizar el código
+
+```bash
+git add .
+git commit -m "Tu descripción"
+git push
+```
+
+Netlify se actualiza automáticamente en 1-2 minutos.
+
+## ⚠️ Notas
+
+- Los datos se guardan en memoria (se pierden con redeploy)
+- Para datos persistentes, conecta MongoDB Atlas (gratis)
+- Las imágenes no persisten, considera usar Cloudinary (gratis)
+
+## 📞 WhatsApp
+
+Los pedidos se envían al número: **3213391720**
+
+## 📄 Licencia
+
+Proyecto de código abierto.
+
