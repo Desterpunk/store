@@ -18,52 +18,55 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: clamp(15px, 5vw, 20px);
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
             background: white;
-            border-radius: 10px;
+            border-radius: clamp(8px, 3vw, 10px);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             max-width: 450px;
             width: 100%;
-            padding: 40px;
+            padding: clamp(30px, 8vw, 40px);
         }
 
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 10px;
-            font-size: 2.5em;
+            font-size: clamp(2em, 6vw, 2.5em);
         }
 
         .subtitle {
             text-align: center;
             color: #666;
-            margin-bottom: 30px;
-            font-size: 1em;
+            margin-bottom: clamp(20px, 5vw, 30px);
+            font-size: clamp(0.9em, 2.5vw, 1em);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: clamp(15px, 4vw, 20px);
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: clamp(6px, 1.5vw, 8px);
             color: #555;
             font-weight: 600;
-            font-size: 1em;
+            font-size: clamp(0.9em, 2.5vw, 1em);
         }
 
         input {
             width: 100%;
-            padding: 12px;
+            padding: clamp(10px, 2.5vw, 12px);
             border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
+            border-radius: clamp(4px, 1vw, 5px);
+            font-size: clamp(0.95em, 2.5vw, 1em);
             transition: border-color 0.3s;
             font-family: 'Segoe UI';
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         input:focus {
@@ -74,30 +77,31 @@
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: clamp(12px, 3vw, 14px);
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 1.1em;
+            border-radius: clamp(4px, 1vw, 5px);
+            font-size: clamp(0.95em, 2.5vw, 1.1em);
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
-            margin-top: 10px;
+            margin-top: clamp(8px, 2vw, 10px);
+            -webkit-tap-highlight-color: transparent;
         }
 
-        button:hover {
-            transform: translateY(-2px);
+        button:active {
+            transform: scale(0.98);
         }
 
         .error {
             color: #e74c3c;
-            font-size: 0.95em;
-            margin-top: 10px;
+            font-size: clamp(0.85em, 2vw, 0.95em);
+            margin-top: clamp(8px, 2vw, 10px);
             text-align: center;
-            padding: 10px;
+            padding: clamp(8px, 2vw, 10px);
             background: #ffe5e5;
-            border-radius: 5px;
+            border-radius: clamp(4px, 1vw, 5px);
             display: none;
         }
 
@@ -107,7 +111,7 @@
 
         .back-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: clamp(15px, 4vw, 20px);
             color: #667eea;
             font-weight: 600;
         }
@@ -115,16 +119,29 @@
         .back-link a {
             color: #667eea;
             text-decoration: none;
+            font-size: clamp(0.9em, 2.5vw, 1em);
         }
 
-        .back-link a:hover {
-            text-decoration: underline;
+        .back-link a:active {
+            opacity: 0.7;
         }
 
         .lock-icon {
-            font-size: 3em;
+            font-size: clamp(2.5em, 8vw, 3em);
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: clamp(15px, 4vw, 20px);
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+                padding-top: clamp(20px, 10vh, 40px);
+            }
+
+            .container {
+                padding: clamp(20px, 5vw, 30px);
+            }
         }
     </style>
 </head>
