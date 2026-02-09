@@ -1,4 +1,4 @@
-# 🛒 Store Manager - Tienda Online
+m# 🛒 Store Manager - Tienda Online
 
 Sistema de gestión de tienda en línea con interfaz web moderna, desplegado en Netlify.
 
