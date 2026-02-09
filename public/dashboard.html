@@ -285,23 +285,12 @@
 
     <div class="container">
         <!-- Panel de Productos -->
-        <div class="panel">
-            <h2>📦 Productos Disponibles</h2>
+        <div class="panel" style="grid-column: 1 / -1;">
+            <h2>📦 Gestión de Productos</h2>
             <div class="admin-only" id="adminAddBtn">
                 <button class="btn-primary" onclick="openAddProductModal()" style="width: 100%; margin-bottom: 20px;">+ Agregar Producto</button>
             </div>
             <div id="productsList"></div>
-        </div>
-
-        <!-- Panel de Carrito -->
-        <div class="panel">
-            <h2>🛒 Carrito de Compras</h2>
-            <div id="cartList"></div>
-            <div id="totalDiv" style="display: none;">
-                <div class="total">Total: $<span id="totalAmount">0.00</span></div>
-                <button class="btn-success" onclick="checkout()" style="width: 100%; margin-top: 15px;">Comprar</button>
-            </div>
-            <div class="empty-message" id="emptyCart">Tu carrito está vacío</div>
         </div>
     </div>
 
@@ -334,23 +323,27 @@
     <script>
         const API_URL = '/api';
         let currentUser = null;
-        let cart = [];
         let editingProductId = null;
 
-        // Cargar usuario
+        // Cargar usuario admin
         window.addEventListener('load', () => {
-            const user = localStorage.getItem('user');
-            if (!user) {
-                window.location.href = '/index.html';
+            const adminUser = localStorage.getItem('adminUser');
+            if (!adminUser) {
+                window.location.href = '/admin.html';
                 return;
             }
 
-            currentUser = JSON.parse(user);
-            document.getElementById('username').textContent = `Bienvenido: ${currentUser.username}`;
+            currentUser = JSON.parse(adminUser);
 
-            if (currentUser.isAdmin) {
-                document.getElementById('adminAddBtn').classList.add('visible');
+            // Verificar que sea admin
+            if (!currentUser.isAdmin) {
+                localStorage.removeItem('adminUser');
+                window.location.href = '/admin.html';
+                return;
             }
+
+            document.getElementById('username').textContent = `Admin: ${currentUser.username}`;
+            document.getElementById('adminAddBtn').classList.add('visible');
 
             loadProducts();
         });
@@ -381,14 +374,13 @@
                             <h3>${productName}</h3>
                             <div class="product-price">$${price.toFixed(2)}</div>
                             <div class="button-group">
-                                <button class="btn-success" onclick="addToCart('${product.id}', '${productName}', ${price})">Agregar al Carrito</button>
-                                ${currentUser.isAdmin ? `
-                                    <button class="btn-warning" onclick="editProduct('${product.id}')">Editar</button>
-                                    <button class="btn-danger" onclick="deleteProduct('${product.id}')">Eliminar</button>
-                                ` : ''}
+                                <button class="btn-warning" onclick="editProduct('${product.id}')">Editar</button>
+                                <button class="btn-danger" onclick="deleteProduct('${product.id}')">Eliminar</button>
                             </div>
                         </div>
                     `;
+                    productsList.appendChild(productEl);
+                });
                     productsList.appendChild(productEl);
                 });
             } catch (error) {
@@ -396,73 +388,6 @@
             }
         }
 
-        function addToCart(id, name, price) {
-            const existingItem = cart.find(item => item.id === id);
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                cart.push({ id, name, price, quantity: 1 });
-            }
-            updateCart();
-        }
-
-        function removeFromCart(id) {
-            cart = cart.filter(item => item.id !== id);
-            updateCart();
-        }
-
-        function updateCart() {
-            const cartList = document.getElementById('cartList');
-            const totalDiv = document.getElementById('totalDiv');
-
-            if (cart.length === 0) {
-                cartList.innerHTML = '';
-                document.getElementById('emptyCart').style.display = 'block';
-                totalDiv.style.display = 'none';
-                return;
-            }
-
-            document.getElementById('emptyCart').style.display = 'none';
-            totalDiv.style.display = 'block';
-
-            cartList.innerHTML = cart.map(item => {
-                const price = item.price || 0;
-                const quantity = item.quantity || 1;
-                return `
-                    <div class="cart-item">
-                        <div class="cart-item-info">
-                            <h4>${item.name}</h4>
-                            <div class="cart-item-price">$${price.toFixed(2)} x ${quantity} = $${(price * quantity).toFixed(2)}</div>
-                        </div>
-                        <button class="btn-danger" onclick="removeFromCart('${item.id}')">Quitar</button>
-                    </div>
-                `;
-            }).join('');
-
-            const total = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
-            document.getElementById('totalAmount').textContent = total.toFixed(2);
-        }
-
-        async function checkout() {
-            if (cart.length === 0) return;
-
-            try {
-                const response = await fetch(`${API_URL}/checkout`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ items: cart })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    window.open(data.whatsappUrl, '_blank');
-                    cart = [];
-                    updateCart();
-                }
-            } catch (error) {
-                alert('Error al procesar la compra');
-            }
-        }
 
         function openAddProductModal() {
             editingProductId = null;
@@ -551,8 +476,8 @@
         }
 
         function logout() {
-            localStorage.removeItem('user');
-            window.location.href = '/index.html';
+            localStorage.removeItem('adminUser');
+            window.location.href = '/store.html';
         }
     </script>
 </body>
