@@ -157,6 +157,7 @@
             right: 0;
             top: 0;
             width: 100%;
+            max-width: 400px;
             height: 100vh;
             background: white;
             box-shadow: -2px 0 15px rgba(0, 0, 0, 0.3);
@@ -165,7 +166,6 @@
             display: flex;
             flex-direction: column;
             z-index: 1000;
-            max-width: 500px;
         }
 
         .cart-panel.open {
@@ -178,9 +178,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.3);
             display: none;
             z-index: 999;
+            backdrop-filter: blur(2px);
         }
 
         .cart-overlay.show {
@@ -351,10 +352,26 @@
             font-size: clamp(1em, 2.5vw, 1.2em);
         }
 
-        /* Tablet */
+        /* Tablet y Desktop */
         @media (max-width: 768px) {
             .cart-panel {
                 max-width: 100%;
+                width: 85vw;
+                max-height: 90vh;
+                right: auto;
+                bottom: 5vh;
+                top: auto;
+                left: 50%;
+                transform: translateX(calc(-50% + 100vw));
+                border-radius: 15px 15px 0 0;
+            }
+
+            .cart-panel.open {
+                transform: translateX(-50%);
+            }
+
+            .cart-overlay {
+                background: rgba(0, 0, 0, 0.5);
             }
         }
 
@@ -375,6 +392,21 @@
                 font-size: 1.3em;
                 bottom: 15px;
                 right: 15px;
+            }
+
+            .cart-panel {
+                width: 90vw;
+                max-height: 80vh;
+                left: 50%;
+                bottom: 0;
+                top: auto;
+                transform: translateX(calc(-50% + 100vw));
+                border-radius: 15px 15px 0 0;
+                box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .cart-panel.open {
+                transform: translateX(-50%);
             }
         }
 
@@ -484,7 +516,10 @@
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCart();
             document.getElementById('cartPanel').classList.add('open');
-            document.getElementById('cartOverlay').classList.add('show');
+            // Solo mostrar overlay en desktop
+            if (window.innerWidth > 768) {
+                document.getElementById('cartOverlay').classList.add('show');
+            }
         }
 
         function removeFromCart(id) {
@@ -535,7 +570,10 @@
             const panel = document.getElementById('cartPanel');
             const overlay = document.getElementById('cartOverlay');
             panel.classList.toggle('open');
-            overlay.classList.toggle('show');
+            // Mostrar/ocultar overlay solo en desktop
+            if (window.innerWidth > 768) {
+                overlay.classList.toggle('show');
+            }
         }
 
         async function checkout() {
