@@ -20,8 +20,8 @@ let users = [
   { username: 'user', password: 'user123', isAdmin: false }
 ];
 
-// Rutas
-app.post('/api/login', (req, res) => {
+// Rutas (sin prefijo /api/ porque netlify.toml ya lo maneja)
+app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const user = users.find(u => u.username === username && u.password === password);
 
@@ -32,7 +32,7 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-app.post('/api/register', (req, res) => {
+app.post('/register', (req, res) => {
   const { username, password } = req.body;
 
   if (users.find(u => u.username === username)) {
@@ -43,11 +43,11 @@ app.post('/api/register', (req, res) => {
   res.json({ success: true });
 });
 
-app.get('/api/products', (req, res) => {
+app.get('/products', (req, res) => {
   res.json(products);
 });
 
-app.post('/api/products', (req, res) => {
+app.post('/products', (req, res) => {
   const { name, price } = req.body;
 
   const product = {
@@ -61,7 +61,7 @@ app.post('/api/products', (req, res) => {
   res.json({ success: true, product });
 });
 
-app.put('/api/products/:id', (req, res) => {
+app.put('/products/:id', (req, res) => {
   const { name, price } = req.body;
   const product = products.find(p => p.id === req.params.id);
 
@@ -75,12 +75,12 @@ app.put('/api/products/:id', (req, res) => {
   res.json({ success: true, product });
 });
 
-app.delete('/api/products/:id', (req, res) => {
+app.delete('/products/:id', (req, res) => {
   products = products.filter(p => p.id !== req.params.id);
   res.json({ success: true });
 });
 
-app.post('/api/checkout', (req, res) => {
+app.post('/checkout', (req, res) => {
   const { items } = req.body;
 
   let message = '🛒 *Orden de Compra*\n\n';
