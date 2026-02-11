@@ -96,11 +96,16 @@ app.get('/api/products', async (req, res) => {
 
 app.post('/api/products', upload.single('image'), async (req, res) => {
   try {
-    const { name, price } = req.body;
+    const { name, price, imageUrl } = req.body;
     const productId = uuidv4();
     let imagePath = '';
 
-    if (req.file) {
+    // Opción 1: Usar URL de imagen de la web
+    if (imageUrl && imageUrl.trim()) {
+      imagePath = imageUrl.trim();
+    }
+    // Opción 2: Subir imagen a Supabase Storage
+    else if (req.file) {
       const filename = `${productId}${path.extname(req.file.originalname)}`;
 
       const { error: uploadError } = await supabase.storage
@@ -143,7 +148,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
 
 app.put('/api/products/:id', upload.single('image'), async (req, res) => {
   try {
-    const { name, price } = req.body;
+    const { name, price, imageUrl } = req.body;
     const productId = req.params.id;
 
     const { data: currentProduct, error: fetchError } = await supabase
@@ -158,7 +163,12 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
 
     let imagePath = currentProduct.image_path;
 
-    if (req.file) {
+    // Opción 1: Usar URL de imagen de la web
+    if (imageUrl && imageUrl.trim()) {
+      imagePath = imageUrl.trim();
+    }
+    // Opción 2: Subir nueva imagen a Supabase Storage
+    else if (req.file) {
       const filename = `${productId}${path.extname(req.file.originalname)}`;
 
       const { error: uploadError } = await supabase.storage
