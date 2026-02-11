@@ -252,7 +252,7 @@ app.post('/api/checkout', (req, res) => {
   message += `\n*Total: $${total.toFixed(2)}*`;
 
   const encodedMessage = encodeURIComponent(message);
-  const whatsappUrl = `https://wa.me/573213391720?text=${encodedMessage}`;
+  const whatsappUrl = `https://wa.me/573134079282?text=${encodedMessage}`;
 
   res.json({ success: true, whatsappUrl });
 });
