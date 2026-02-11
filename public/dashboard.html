@@ -368,7 +368,7 @@
                     const productName = product.name || 'Sin nombre';
                     productEl.innerHTML = `
                         <div class="product-image">
-                            ${product.imagePath ? `<img src="${product.imagePath}" alt="${productName}">` : '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #ddd;">📷</div>'}
+                            ${product.image_path ? `<img src="${product.image_path}" alt="${productName}">` : '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #ddd;">📷</div>'}
                         </div>
                         <div class="product-info">
                             <h3>${productName}</h3>
@@ -404,7 +404,7 @@
             if (product) {
                 document.getElementById('productName').value = product.name;
                 document.getElementById('productPrice').value = product.price;
-                document.getElementById('productImage').value = product.imagePath || '';
+                document.getElementById('productImage').value = product.image_path || '';
                 document.getElementById('productModal').classList.add('active');
             }
         }
@@ -430,7 +430,7 @@
             const productData = {
                 name: name,
                 price: price,
-                imagePath: imageUrl || ''
+                image_path: imageUrl || ''
             };
 
             try {

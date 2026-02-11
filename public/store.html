@@ -522,7 +522,7 @@
                     productCard.className = 'product-card';
                     productCard.innerHTML = `
                         <div class="product-image">
-                            ${product.imagePath ? `<img src="${product.imagePath}" alt="${productName}" loading="lazy">` : '📷'}
+                            ${product.image_path ? `<img src="${product.image_path}" alt="${productName}" loading="lazy">` : '📷'}
                         </div>
                         <div class="product-name">${productName}</div>
                         <div class="product-price">$${price.toLocaleString('es-CO', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</div>

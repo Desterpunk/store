@@ -1,12 +1,12 @@
-// server.js - Backend Express.js para Store Manager
+// server.js - Backend Express.js para Store Manager con Supabase
 
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const uuid = require('uuid');
+const { v4: uuidv4 } = require('uuid');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 
@@ -16,113 +16,217 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Configurar multer para subir imágenes
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, uuid.v4() + path.extname(file.originalname));
-  }
-});
+// Inicializar cliente Supabase
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_KEY || '';
 
-const upload = multer({ storage });
-
-// Archivo de datos
-const dataFile = path.join(__dirname, 'data.json');
-
-// Inicializar datos si no existen
-if (!fs.existsSync(dataFile)) {
-  const initialData = {
-    products: [],
-    users: [
-      { username: 'admin', password: 'admin123', isAdmin: true },
-      { username: 'user', password: 'user123', isAdmin: false }
-    ]
-  };
-  fs.writeFileSync(dataFile, JSON.stringify(initialData, null, 2));
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('⚠️ Variables SUPABASE_URL y SUPABASE_KEY no configuradas. Usa variables de entorno.');
 }
 
-// Helpers
-const getData = () => JSON.parse(fs.readFileSync(dataFile, 'utf8'));
-const saveData = (data) => fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Configurar multer para subir imágenes (almacenamiento temporal)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // RUTAS DE AUTENTICACIÓN
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  const data = getData();
-  const user = data.users.find(u => u.username === username && u.password === password);
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-  if (user) {
-    res.json({ success: true, isAdmin: user.isAdmin, username: user.username });
-  } else {
-    res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' });
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .single();
+
+    if (error || !data) {
+      return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' });
+    }
+
+    res.json({ success: true, isAdmin: data.is_admin, username: data.username });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error en servidor', error: err.message });
   }
 });
 
-app.post('/api/register', (req, res) => {
-  const { username, password } = req.body;
-  const data = getData();
+app.post('/api/register', async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-  if (data.users.find(u => u.username === username)) {
-    return res.status(400).json({ success: false, message: 'Usuario ya existe' });
+    // Verificar si usuario existe
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .single();
+
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Usuario ya existe' });
+    }
+
+    // Crear nuevo usuario
+    const { data, error } = await supabase
+      .from('users')
+      .insert([{ username, password, isAdmin: false }]);
+
+    if (error) {
+      return res.status(400).json({ success: false, message: 'Error al crear usuario', error: error.message });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error en servidor', error: err.message });
   }
-
-  data.users.push({ username, password, isAdmin: false });
-  saveData(data);
-  res.json({ success: true });
 });
 
 // RUTAS DE PRODUCTOS
-app.get('/api/products', (req, res) => {
-  const data = getData();
-  res.json(data.products);
-});
+app.get('/api/products', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-app.post('/api/products', upload.single('image'), (req, res) => {
-  const { name, price } = req.body;
-  const data = getData();
+    if (error) {
+      return res.status(400).json({ success: false, message: 'Error al obtener productos', error: error.message });
+    }
 
-  const product = {
-    id: uuid.v4(),
-    name,
-    price: parseFloat(price),
-    imagePath: req.file ? `/uploads/${req.file.filename}` : ''
-  };
-
-  data.products.push(product);
-  saveData(data);
-  res.json({ success: true, product });
-});
-
-app.put('/api/products/:id', upload.single('image'), (req, res) => {
-  const { name, price } = req.body;
-  const data = getData();
-  const product = data.products.find(p => p.id === req.params.id);
-
-  if (!product) {
-    return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+    res.json(data || []);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error en servidor', error: err.message });
   }
-
-  product.name = name;
-  product.price = parseFloat(price);
-  if (req.file) {
-    product.imagePath = `/uploads/${req.file.filename}`;
-  }
-
-  saveData(data);
-  res.json({ success: true, product });
 });
 
-app.delete('/api/products/:id', (req, res) => {
-  const data = getData();
-  data.products = data.products.filter(p => p.id !== req.params.id);
-  saveData(data);
-  res.json({ success: true });
+app.post('/api/products', upload.single('image'), async (req, res) => {
+  try {
+    const { name, price } = req.body;
+    const productId = uuidv4();
+    let imagePath = '';
+
+    // Subir imagen a Supabase Storage si existe
+    if (req.file) {
+      const filename = `${productId}${path.extname(req.file.originalname)}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filename, req.file.buffer, {
+          contentType: req.file.mimetype
+        });
+
+      if (uploadError) {
+        return res.status(400).json({ success: false, message: 'Error al subir imagen', error: uploadError.message });
+      }
+
+      // Obtener URL pública
+      const { data: urlData } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filename);
+
+      imagePath = urlData.publicUrl;
+    }
+
+    // Crear producto
+    const { data, error } = await supabase
+      .from('products')
+      .insert([{
+        id: productId,
+        name,
+        price: parseFloat(price),
+        image_path: imagePath
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(400).json({ success: false, message: 'Error al crear producto', error: error.message });
+    }
+
+    res.json({ success: true, product: data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error en servidor', error: err.message });
+  }
+});
+
+app.put('/api/products/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { name, price } = req.body;
+    const productId = req.params.id;
+
+    // Obtener producto actual
+    const { data: currentProduct, error: fetchError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', productId)
+      .single();
+
+    if (fetchError || !currentProduct) {
+      return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+    }
+
+    let imagePath = currentProduct.image_path;
+
+    // Subir nueva imagen si existe
+    if (req.file) {
+      const filename = `${productId}${path.extname(req.file.originalname)}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filename, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: true
+        });
+
+      if (uploadError) {
+        return res.status(400).json({ success: false, message: 'Error al subir imagen', error: uploadError.message });
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filename);
+
+      imagePath = urlData.publicUrl;
+    }
+
+    // Actualizar producto
+    const { data, error } = await supabase
+      .from('products')
+      .update({
+        name,
+        price: parseFloat(price),
+        image_path: imagePath
+      })
+      .eq('id', productId)
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(400).json({ success: false, message: 'Error al actualizar producto', error: error.message });
+    }
+
+    res.json({ success: true, product: data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error en servidor', error: err.message });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) {
+      return res.status(400).json({ success: false, message: 'Error al eliminar producto', error: error.message });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error en servidor', error: err.message });
+  }
 });
 
 // RUTA PARA ENVIAR A WHATSAPP
@@ -145,10 +249,9 @@ app.post('/api/checkout', (req, res) => {
   res.json({ success: true, whatsappUrl });
 });
 
-// Servir archivos estáticos
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en puerto ${PORT}`);
+  console.log(`📊 Base de datos: ${supabaseUrl ? 'Supabase conectado' : 'No conectado - revisa variables de entorno'}`);
 });
+
